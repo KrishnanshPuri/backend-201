@@ -24,7 +24,7 @@ if(fullname==="" || email==="" || username==="" || password===""){
 
 // already exsist
 
-const exsistUser=User.findOne({
+const exsistUser=await User.findOne({
    $or: [{email},{username}] // $or: means check for all the entries in array if any one found so $ help us apply operators
 
 })
