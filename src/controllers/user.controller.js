@@ -3,6 +3,24 @@ import {ApiError} from "../utils/APIError.js"
 import {User} from "../models/user.model.js"
 import {uploadOnCloudinary} from "../utils/cloudinary.service.js"
 import {ApiResponse} from "../utils/ApiResponse.js"
+
+const generateAccessAndRefereshToken = async(userId)=>{
+    try {
+        // User is a mongoose one , user is the created one for which we have defined our own methods
+        const user = await User.findById(userId);
+        const accessToken = user.generateAccessToken();
+        const refreshToken = user.generateRefreshToken();
+        user.refreshToken=refreshToken;
+        await user.save({validateBeforeSave:false})
+        return {accessToken,refreshToken};
+    } catch (error) {
+        throw new ApiError(500,"Something went wrong while generating error")
+    }
+}
+
+
+
+
 const registerUser=asyncHandler(async(req,res)=>{
   // this is the basic logic we ususally follows:-
   // get user details from frontend
@@ -64,6 +82,30 @@ if(!avatar) throw new ApiError(400,"Avatar is required")
             new ApiResponse(200,check,"User Registered Successfully")
         )
 
+})
+
+const loginUser = asyncHandler(async(req,res)=>{
+    // req body ->data
+    //username or email
+    // find the user
+    //password check
+    // access and refresh token
+    // send cookie
+    const{email,username,password} = req.body;
+    if(!username || !email) {
+        throw new ApiError(400,"username or email is missing")
+    }
+
+   const user = await User.findOne({
+        $or:[{username},{email}]
+    })
+
+    if(!user) throw new ApiError(404,"User dont exsist");
+
+   const validPass = await user.isPasswordCorrect(password)
+   if(!validPass) throw new ApiError(401,"Invalid User")
+
+  const {accessToken,refreshToken} = await generateAccessAndRefereshToken(user.__id);
 })
 
 export {registerUser}
