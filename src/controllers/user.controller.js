@@ -105,7 +105,31 @@ const loginUser = asyncHandler(async(req,res)=>{
    const validPass = await user.isPasswordCorrect(password)
    if(!validPass) throw new ApiError(401,"Invalid User")
 
-  const {accessToken,refreshToken} = await generateAccessAndRefereshToken(user.__id);
+  const {accessToken,refreshToken} = await generateAccessAndRefereshToken(user._id);
+
+  const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
+
+  // options are required for cokkies 
+  const options={
+    httpOnly:true,
+    secure:true
+  }
+
+  return res
+  .status(200)
+  .cookie("accessToken",accessToken,options)
+  .cookie("refreshToken",refreshToken,options)
+  .json(
+    new ApiResponse(
+        200,
+        {
+            user:loggedInUser,accessToken,refreshToken
+        },
+        "User logged In Successfully"
+    )
+  )
+
+
 })
 
 export {registerUser}
