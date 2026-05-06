@@ -18,9 +18,6 @@ const generateAccessAndRefereshToken = async(userId)=>{
     }
 }
 
-
-
-
 const registerUser=asyncHandler(async(req,res)=>{
   // this is the basic logic we ususally follows:-
   // get user details from frontend
@@ -154,5 +151,5 @@ const logoutUser = asyncHandler(async(req,res)=>{
             .clearCookie("refreshToken",options)
             .json(new ApiResponse(200,{},"user logged Out"))
 })
-
-export {registerUser,loginUser,logoutUser}
+ 
+export {registerUser,loginUser,logoutUser} 
